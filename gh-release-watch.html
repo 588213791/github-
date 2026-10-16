@@ -1,0 +1,1981 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#000000">
+<meta name="color-scheme" content="dark">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>网站订阅</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='112' fill='%230b1220'/%3E%3Cpath d='M256 96c-79 0-143 64-143 143v76l-30 46c-6 9 1 21 12 21h322c11 0 18-12 12-21l-30-46v-76c0-79-64-143-143-143z' fill='%234d9bff'/%3E%3Cpath d='M206 400a50 50 0 0 0 100 0z' fill='%234d9bff'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#000;--card:#151b28;--card2:#1b2233;--panel:#10151f;--line:#232c3f;
+  --text:#e9edf5;--dim:#c3cbdb;--muted:#8b95a9;
+  --blue:#2b7fff;--blue-soft:rgba(43,127,255,.14);--blue-line:rgba(43,127,255,.35);
+  --green:#22c55e;--red:#ef4444;--amber:#f59e0b;--radius:14px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,"Segoe UI",sans-serif;
+  font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
+body{min-height:100dvh;overscroll-behavior-y:contain}
+a{color:var(--blue);text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+
+#topbar{position:sticky;top:0;z-index:50;display:flex;align-items:center;gap:10px;
+  padding:calc(env(safe-area-inset-top,0px) + 12px) 14px 12px;background:rgba(0,0,0,.82);
+  backdrop-filter:saturate(160%) blur(14px);-webkit-backdrop-filter:saturate(160%) blur(14px)}
+#topbar .title{flex:1;font-size:20px;font-weight:700;letter-spacing:.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.icon-btn{width:38px;height:38px;flex:0 0 auto;display:grid;place-items:center;border-radius:50%;
+  background:#1c1f26;color:var(--text);font-size:17px;transition:background .15s,transform .1s;position:relative}
+.icon-btn:active{background:#2a2f39;transform:scale(.94)}
+.dot-badge{position:absolute;top:4px;right:4px;min-width:16px;height:16px;padding:0 4px;border-radius:999px;
+  background:var(--red);color:#fff;font-size:10px;font-weight:700;display:grid;place-items:center;line-height:1}
+
+main{padding:4px 14px calc(env(safe-area-inset-bottom,0px) + 40px);max-width:720px;margin:0 auto}
+.section-head{display:flex;align-items:baseline;justify-content:space-between;margin:22px 2px 12px}
+.section-head h3{margin:0;font-size:17px;font-weight:700}
+.section-head .count{color:var(--muted);font-size:13px}
+
+.card{display:block;background:var(--card);border-radius:var(--radius);padding:14px;margin-bottom:12px}
+.sub-title{margin:0;font-size:17px;font-weight:700;word-break:break-all;line-height:1.35}
+.row-between{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.badge{flex:0 0 auto;padding:3px 12px;border-radius:999px;font-size:13px;font-weight:700;white-space:nowrap}
+.badge.on{background:var(--green);color:#04240f}
+.badge.off{background:#3a4356;color:#c8d0e0}
+.badge.err{background:var(--red);color:#fff}
+.badge.pre{background:#3b2f6b;color:#cbbcff}
+.sub-link{display:block;margin:8px 0 10px;font-size:14px;word-break:break-all;text-decoration:underline;
+  text-underline-offset:3px;color:#4d9bff}
+.meta-list{display:flex;flex-direction:column;gap:3px;font-size:14px}
+.meta-list .lbl{color:var(--muted)}
+.meta-list .val{color:var(--dim);font-weight:600}
+.meta-list .val.warn{color:var(--amber)}
+
+.btn-primary{display:block;width:100%;height:44px;border-radius:10px;background:var(--blue);color:#fff;
+  font-size:15px;font-weight:700;margin:0 0 4px;transition:filter .15s,transform .1s}
+.btn-primary:active{filter:brightness(.88);transform:scale(.99)}
+.btn-primary[disabled]{opacity:.6}
+.btn-ghost{display:inline-flex;align-items:center;justify-content:center;gap:6px;height:40px;padding:0 16px;
+  border-radius:10px;background:var(--blue-soft);color:#7cb0ff;font-size:14px;font-weight:600}
+.btn-ghost:active{background:rgba(43,127,255,.26)}
+.btn-row{display:flex;gap:10px;margin-top:10px}
+.btn-row>*{flex:1}
+
+.timeline{position:relative;padding-left:22px}
+.timeline::before{content:"";position:absolute;left:5px;top:8px;bottom:8px;width:2px;border-radius:2px;
+  background:linear-gradient(to bottom,rgba(43,127,255,.55),rgba(43,127,255,.12))}
+.tl-item{position:relative;margin-bottom:14px}
+.tl-dot{position:absolute;left:-22px;top:12px;width:11px;height:11px;border-radius:50%;background:var(--blue);
+  box-shadow:0 0 0 3px rgba(43,127,255,.16)}
+.tl-item.is-dup .tl-dot{background:#56617a;box-shadow:0 0 0 3px rgba(86,97,122,.16)}
+.tl-card{background:var(--card);border-radius:12px;padding:11px 12px}
+.tl-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.tl-time{display:inline-flex;align-items:center;gap:6px;font-size:15px;color:var(--text);font-weight:500}
+.tl-time .tag{font-size:12px;color:var(--muted);font-weight:400}
+.btn-snap{display:inline-flex;align-items:center;gap:5px;height:30px;padding:0 13px;border-radius:8px;
+  background:var(--blue);color:#fff;font-size:13px;font-weight:700}
+.btn-snap:active{filter:brightness(.88)}
+
+.sum-box{margin-top:10px;background:var(--card2);border-radius:9px;padding:10px 11px}
+.sum-head{display:flex;flex-wrap:wrap;align-items:center;gap:5px;font-size:13px;margin-bottom:6px}
+.sum-head .who{font-weight:700;color:var(--text)}
+.sum-head .note{color:var(--muted);font-size:12px}
+.sum-body{font-size:14px;color:var(--dim);word-break:break-word;overflow-wrap:anywhere}
+.sum-body.err{color:#ffb4b4}
+.sum-body .hi{color:#7cb0ff;font-weight:700}
+.sum-body ul{margin:5px 0;padding-left:19px}
+.sum-body li{margin:2px 0;word-break:break-word;overflow-wrap:anywhere}
+.sum-body code{word-break:break-word;overflow-wrap:anywhere}
+
+.tl-toggle{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;height:40px;margin-top:10px;
+  border-radius:9px;background:var(--blue-soft);color:#7cb0ff;font-size:14px;font-weight:600}
+.tl-toggle:active{background:rgba(43,127,255,.26)}
+.tl-toggle .arrow{transition:transform .18s;font-size:11px}
+.tl-toggle.open .arrow{transform:rotate(180deg)}
+.tl-panel{margin-top:9px;border-top:1px solid var(--line);padding-top:9px;font-size:13.5px;color:var(--dim)}
+.tl-panel.hidden{display:none}
+.diff-add{color:#78e08f;background:rgba(34,197,94,.08);border-left:2px solid rgba(34,197,94,.5);padding:1px 7px;
+  white-space:pre-wrap;word-break:break-word}
+.diff-del{color:#ff9a9a;background:rgba(239,68,68,.08);border-left:2px solid rgba(239,68,68,.45);padding:1px 7px;
+  white-space:pre-wrap;word-break:break-word;opacity:.8}
+
+.markdown{overflow-wrap:anywhere}
+.markdown>*:first-child{margin-top:0}
+.markdown>*:last-child{margin-bottom:0}
+.markdown p{margin:6px 0}
+.markdown h1,.markdown h2,.markdown h3,.markdown h4{margin:12px 0 6px;font-size:15px;font-weight:700;color:var(--text)}
+.markdown ul,.markdown ol{margin:6px 0;padding-left:20px}
+.markdown li{margin:3px 0}
+.markdown code{background:rgba(255,255,255,.08);border-radius:4px;padding:1px 5px;font-size:12.5px;
+  word-break:break-word;overflow-wrap:anywhere;
+  font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+/* 手机上横向滚动代码很难用，直接让它换行，顺便避免长命令把页面撑宽 */
+.markdown pre{background:#0c1017;border:1px solid var(--line);border-radius:8px;padding:9px 11px;margin:8px 0;
+  white-space:pre-wrap;word-break:break-word;overflow-wrap:anywhere;overflow-x:auto}
+.markdown pre code{background:none;padding:0;font-size:12.5px;line-height:1.55;white-space:inherit;word-break:inherit}
+.markdown blockquote{margin:8px 0;padding:2px 0 2px 10px;border-left:3px solid var(--line);color:var(--muted)}
+.markdown hr{border:0;border-top:1px solid var(--line);margin:12px 0}
+.markdown a{word-break:break-all}
+
+.modal-mask{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.66);backdrop-filter:blur(3px);
+  display:flex;align-items:flex-end;justify-content:center;animation:fade .16s ease}
+@keyframes fade{from{opacity:0}}
+.modal{width:100%;max-width:720px;max-height:88dvh;overflow-y:auto;background:var(--panel);
+  border-radius:18px 18px 0 0;padding:18px 16px calc(env(safe-area-inset-bottom,0px) + 20px);
+  animation:slideUp .2s cubic-bezier(.2,.8,.3,1);-webkit-overflow-scrolling:touch}
+@keyframes slideUp{from{transform:translateY(24px);opacity:.5}}
+.modal h2{margin:0 0 14px;font-size:18px;font-weight:700}
+
+.field{margin-bottom:14px}
+.field>label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
+.field input,.field select,.field textarea{width:100%;height:44px;padding:0 12px;border-radius:10px;
+  border:1px solid var(--line);background:#0c1119;color:var(--text);font-size:15px;outline:none}
+.field input:focus,.field select:focus{border-color:var(--blue)}
+.field .hint{margin-top:6px;font-size:12px;color:var(--muted);line-height:1.5}
+
+.switch-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}
+.switch-row:last-child{border-bottom:0}
+.switch-row .txt strong{display:block;font-size:15px;font-weight:600}
+.switch-row .txt span{font-size:12px;color:var(--muted)}
+.switch{flex:0 0 auto;width:50px;height:30px;border-radius:999px;background:#39415a;position:relative;transition:background .18s}
+.switch::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:transform .18s}
+.switch.on{background:var(--green)}
+.switch.on::after{transform:translateX(20px)}
+
+#toasts{position:fixed;top:calc(env(safe-area-inset-top,0px) + 8px);left:0;right:0;z-index:300;
+  display:flex;flex-direction:column;align-items:center;gap:8px;padding:0 12px;pointer-events:none}
+.toast{pointer-events:auto;width:100%;max-width:460px;background:#1d2636;border:1px solid var(--blue-line);
+  border-left:3px solid var(--blue);border-radius:12px;padding:11px 13px;
+  box-shadow:0 10px 32px rgba(0,0,0,.55);animation:toastIn .24s cubic-bezier(.2,.9,.3,1)}
+.toast.err{border-color:rgba(239,68,68,.5);border-left-color:var(--red)}
+.toast.ok{border-color:rgba(34,197,94,.5);border-left-color:var(--green)}
+.toast .t-title{font-size:14.5px;font-weight:700;margin-bottom:3px;word-break:break-word}
+.toast .t-body{font-size:13px;color:var(--dim);white-space:pre-wrap;word-break:break-word;max-height:150px;overflow:hidden}
+@keyframes toastIn{from{transform:translateY(-16px);opacity:0}}
+.toast.out{animation:toastOut .2s ease forwards}
+@keyframes toastOut{to{transform:translateY(-12px);opacity:0}}
+
+.fab{position:fixed;right:18px;bottom:calc(env(safe-area-inset-bottom,0px) + 20px);z-index:60;width:56px;height:56px;
+  border-radius:50%;background:var(--blue);color:#fff;font-size:28px;font-weight:300;display:grid;place-items:center;
+  box-shadow:0 8px 24px rgba(43,127,255,.42)}
+.fab:active{transform:scale(.94)}
+
+.empty{text-align:center;padding:56px 20px;color:var(--muted)}
+.empty .big{font-size:42px;margin-bottom:10px}
+.empty p{margin:6px 0;font-size:14px}
+.loading{text-align:center;padding:40px;color:var(--muted)}
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.2);
+  border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;vertical-align:-3px;margin-right:7px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.kv-grid{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;font-size:13px}
+.kv-grid dt{color:var(--muted)}
+.kv-grid dd{margin:0;color:var(--dim);word-break:break-all}
+.note-box{background:#0d1420;border:1px solid var(--line);border-radius:10px;padding:11px 12px;font-size:12.5px;
+  color:var(--muted);line-height:1.7}
+.note-box b{color:var(--dim)}
+.note-box.warn{border-color:rgba(245,158,11,.4);background:rgba(245,158,11,.07)}
+.evt-item{padding:10px 0;border-bottom:1px solid var(--line)}
+.evt-item:last-child{border-bottom:0}
+.evt-item .e-title{font-size:14px;font-weight:600;margin-bottom:3px}
+.evt-item .e-body{font-size:12.5px;color:var(--muted);white-space:pre-wrap;word-break:break-word}
+.evt-item .e-time{font-size:11.5px;color:#6b7688;margin-top:4px}
+.pill-row{display:flex;flex-wrap:wrap;gap:8px}
+.pill{padding:7px 14px;border-radius:999px;background:#1c2333;color:var(--dim);font-size:13px;border:1px solid var(--line)}
+.pill.active{background:var(--blue);border-color:var(--blue);color:#fff;font-weight:600}
+.asset-list{display:flex;flex-direction:column;gap:5px;margin-top:8px}
+.asset{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;color:var(--muted)}
+.asset b{color:var(--dim);font-weight:600}
+</style>
+</head>
+<body>
+<header id="topbar"></header>
+<main id="view"><div class="loading"><span class="spinner"></span>正在启动…</div></main>
+<div id="toasts"></div>
+
+<script>
+(function () {
+'use strict';
+
+/* ===================================================================
+   常量
+   =================================================================== */
+var LS_KEY = 'grw.standalone.v1';
+var API = 'https://api.github.com';
+var MAX_SNAPS_PER_SUB = 60;      // 每个订阅最多留多少条历史
+var MAX_BODY = 6000;             // 单条正文最多存多少字
+var SEED_COUNT = 6;              // 首次订阅静默补齐多少个历史版本
+var EVENT_KEEP = 60;             // 提醒记录最多保留多少条
+
+/* ===================================================================
+   存储
+   =================================================================== */
+function defaultDB() {
+  return {
+    v: 1,
+    settings: {
+      githubToken: '',
+      defaultIntervalMinutes: 1440,
+      notifySound: true,
+      vibrate: true,
+      checkSeconds: 30
+    },
+    subs: [],
+    snaps: [],
+    events: [],
+    reports: [],
+    seq: { sub: 0, snap: 0, event: 0, report: 0 },
+    sinceId: 0
+  };
+}
+
+var DB = loadDB();
+
+function loadDB() {
+  try {
+    var raw = localStorage.getItem(LS_KEY);
+    if (!raw) return defaultDB();
+    var d = JSON.parse(raw);
+    var base = defaultDB();
+    d.settings = Object.assign(base.settings, d.settings || {});
+    d.seq = Object.assign(base.seq, d.seq || {});
+    d.subs = d.subs || [];
+    d.snaps = d.snaps || [];
+    d.events = d.events || [];
+    d.reports = d.reports || [];
+    return d;
+  } catch (e) {
+    return defaultDB();
+  }
+}
+
+var quotaWarned = false;
+
+function saveDB() {
+  try {
+    localStorage.setItem(LS_KEY, JSON.stringify(DB));
+    return true;
+  } catch (e) {
+    // 多半是配额满了：激进裁剪后再试一次
+    pruneSnaps(true);
+    trimEvents(15);
+    try {
+      localStorage.setItem(LS_KEY, JSON.stringify(DB));
+      if (!quotaWarned) {
+        quotaWarned = true;
+        toast('存储空间紧张', '已自动清理最旧的巡检记录。可以去设置里导出备份后清理数据。', 'err');
+      }
+      return true;
+    } catch (e2) {
+      toast('保存失败', '浏览器存储空间已满，请在设置里清理数据。', 'err');
+      return false;
+    }
+  }
+}
+
+function nextId(kind) {
+  DB.seq[kind] = (DB.seq[kind] || 0) + 1;
+  return DB.seq[kind];
+}
+
+/** 裁剪历史：先丢「无变化」的旧记录，再丢最旧的 */
+function pruneSnaps(aggressive) {
+  var keep = aggressive ? Math.floor(MAX_SNAPS_PER_SUB / 2) : MAX_SNAPS_PER_SUB;
+  var bySub = {};
+  DB.snaps.forEach(function (s) {
+    (bySub[s.subId] = bySub[s.subId] || []).push(s);
+  });
+  var drop = {};
+  Object.keys(bySub).forEach(function (k) {
+    var list = bySub[k];
+    if (list.length <= keep) return;
+    var sorted = list.slice().sort(function (a, b) {
+      // 重复的排前面（优先删），其次按时间从旧到新
+      if (a.isDuplicate !== b.isDuplicate) return b.isDuplicate - a.isDuplicate;
+      return a.id - b.id;
+    });
+    sorted.slice(0, list.length - keep).forEach(function (s) { drop[s.id] = 1; });
+  });
+  if (Object.keys(drop).length) {
+    DB.snaps = DB.snaps.filter(function (s) { return !drop[s.id]; });
+  }
+}
+
+function trimEvents(keep) {
+  if (DB.events.length <= keep) return;
+  DB.events = DB.events.slice(-keep);
+}
+
+/* ===================================================================
+   通用工具
+   =================================================================== */
+var $ = function (sel, root) { return (root || document).querySelector(sel); };
+var $$ = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
+
+function esc(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+function pad(n) { return String(n).padStart(2, '0'); }
+function fmtShort(ts) {
+  if (!ts) return '—';
+  var d = new Date(ts);
+  return (d.getMonth() + 1) + '-' + d.getDate() + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+}
+function fmtFull(ts) {
+  if (!ts) return '—';
+  var d = new Date(ts);
+  return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+}
+function fmtRel(ts) {
+  if (!ts) return '—';
+  var diff = Date.now() - ts;
+  if (diff < 0) {
+    var f = -diff;
+    if (f < 3600000) return Math.round(f / 60000) + '分钟后';
+    if (f < 86400000) return Math.round(f / 3600000) + '小时后';
+    return Math.round(f / 86400000) + '天后';
+  }
+  if (diff < 60000) return '刚刚';
+  if (diff < 3600000) return Math.round(diff / 60000) + '分钟前';
+  if (diff < 86400000) return Math.round(diff / 3600000) + '小时前';
+  if (diff < 2592000000) return Math.round(diff / 86400000) + '天前';
+  return fmtShort(ts);
+}
+function sizeText(b) {
+  if (!b) return '0 B';
+  var u = ['B', 'KB', 'MB', 'GB'], i = 0, v = b;
+  while (v >= 1024 && i < u.length - 1) { v /= 1024; i++; }
+  return v.toFixed(v < 10 && i > 0 ? 1 : 0) + ' ' + u[i];
+}
+function statusOf(sub) {
+  if (!sub.enabled) return { cls: 'off', text: '已暂停' };
+  if (sub.lastError) return { cls: 'err', text: '异常' };
+  return { cls: 'on', text: '运行中' };
+}
+function bytesOfDB() { return new Blob([JSON.stringify(DB)]).size; }
+
+/** cyrb53：稳定、够用的 53 位字符串哈希（不依赖 crypto.subtle，http 下也能用） */
+function hash(str, seed) {
+  var h1 = 0xdeadbeef ^ (seed || 0), h2 = 0x41c6ce57 ^ (seed || 0);
+  for (var i = 0; i < str.length; i++) {
+    var ch = str.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(36);
+}
+
+/* ===================================================================
+   Markdown（先转义再解析，防 XSS）
+   =================================================================== */
+function inlineMd(s) {
+  return s
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/(^|[^*\w])\*([^*\n]+)\*/g, '$1<em>$2</em>')
+    .replace(/~~([^~]+)~~/g, '<del>$1</del>')
+    .replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+    .replace(/(^|[\s(])(https?:\/\/[^\s<)]+)/g, '$1<a href="$2" target="_blank" rel="noopener noreferrer">$2</a>');
+}
+/** 只处理强调/代码，不自动链接 URL —— 摘要列表里用它，避免超长链接把页面撑宽 */
+function inlineMdPlain(s) {
+  return s
+    .replace(/`([^`]+)`/g, '<code>$1</code>')
+    .replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>')
+    .replace(/(^|[^*\w])\*([^*\n]+)\*/g, '$1<em>$2</em>');
+}
+
+function renderMarkdown(src) {  var text = String(src == null ? '' : src).replace(/\r\n?/g, '\n');
+  var blocks = [];
+  text = text.replace(/```([^\n`]*)\n([\s\S]*?)```/g, function (m, lang, code) {
+    blocks.push({ lang: String(lang).trim(), code: code });
+    return '\u0000C' + (blocks.length - 1) + '\u0000';
+  });
+  text = esc(text);
+
+  var out = [], listType = null;
+  function closeList() { if (listType) { out.push('</' + listType + '>'); listType = null; } }
+
+  text.split('\n').forEach(function (line) {
+    var t = line.trim();
+    if (/^\u0000C\d+\u0000$/.test(t)) { closeList(); out.push(t); return; }
+    if (!t) { closeList(); return; }
+    var m;
+    if ((m = line.match(/^(#{1,6})\s+(.*)$/))) {
+      closeList();
+      var lvl = Math.min(4, m[1].length);
+      out.push('<h' + lvl + '>' + inlineMd(m[2]) + '</h' + lvl + '>');
+      return;
+    }
+    if (/^\s*(?:-{3,}|\*{3,}|_{3,})\s*$/.test(line)) { closeList(); out.push('<hr>'); return; }
+    if ((m = line.match(/^\s*(?:&gt;|>)\s?(.*)$/))) { closeList(); out.push('<blockquote>' + inlineMd(m[1]) + '</blockquote>'); return; }
+    if ((m = line.match(/^\s*[-*+]\s+(.*)$/))) {
+      if (listType !== 'ul') { closeList(); out.push('<ul>'); listType = 'ul'; }
+      out.push('<li>' + inlineMd(m[1]) + '</li>');
+      return;
+    }
+    if ((m = line.match(/^\s*\d+[.)]\s+(.*)$/))) {
+      if (listType !== 'ol') { closeList(); out.push('<ol>'); listType = 'ol'; }
+      out.push('<li>' + inlineMd(m[1]) + '</li>');
+      return;
+    }
+    closeList();
+    out.push('<p>' + inlineMd(line) + '</p>');
+  });
+  closeList();
+
+  return out.join('\n').replace(/\u0000C(\d+)\u0000/g, function (m, i) {
+    var b = blocks[Number(i)];
+    var la = b.lang ? ' data-lang="' + esc(b.lang) + '"' : '';
+    return '<pre><code' + la + '>' + esc(b.code.replace(/\n$/, '')) + '</code></pre>';
+  });
+}
+
+/* ===================================================================
+   内容指纹与去重
+   =================================================================== */
+var FENCE_RE = /```([^\n`]*)\n([\s\S]*?)```/g;
+var TILDE_RE = /~~~([^\n~]*)\n([\s\S]*?)~~~/g;
+
+function analyzeBody(rawBody) {
+  var raw = String(rawBody == null ? '' : rawBody);
+  var sem = raw, hadJson = false;
+
+  sem = sem.replace(/<!--[\s\S]*?-->/g, ' ');
+
+  function dropJson(m, lang, code) {
+    var t = code.trim();
+    if (t.charAt(0) === '{' || t.charAt(0) === '[') {
+      try { JSON.parse(t); hadJson = true; return ' '; } catch (e) { /* 不是合法 JSON */ }
+    }
+    return m;
+  }
+  sem = sem.replace(FENCE_RE, dropJson).replace(TILDE_RE, dropJson);
+
+  sem = sem.replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1')
+           .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+           .replace(/<(https?:\/\/[^>]+)>/g, ' ')
+           .replace(/https?:\/\/\S+/g, ' ')
+           .replace(/^\s{0,3}#{1,6}\s*/gm, '')
+           .replace(/^\s{0,3}[-*+]\s+/gm, '')
+           .replace(/[*_`>~|]/g, '')
+           .replace(/[ \t\u00a0]+/g, ' ')
+           .replace(/\n{2,}/g, '\n')
+           .trim().toLowerCase();
+
+  return {
+    rawFp: hash(raw.replace(/\s+/g, ' ').trim()),
+    semFp: hash(sem),
+    hadJson: hadJson
+  };
+}
+
+function dupText(hadJson) {
+  return hadJson ? '完全相同的内容（有tranJson，历史去重后无新增）' : '完全相同的内容（历史去重后无新增）';
+}
+
+function compareWithPrev(cur, prev) {
+  if (!prev) return { isDuplicate: false, reason: null };
+  if (cur.rawFp === prev.rawFp) {
+    return { isDuplicate: true, reason: dupText(cur.hadJson || !!prev.hadJson) };
+  }
+  if (cur.semFp === prev.semFp && (cur.hadJson || prev.hadJson)) {
+    return { isDuplicate: true, reason: dupText(true) };
+  }
+  return { isDuplicate: false, reason: null };
+}
+
+function buildDiff(curBody, prevBody) {
+  var cur = String(curBody || '').trim();
+  var prev = String(prevBody || '').trim();
+  if (!prev) return { hasPrev: false, added: [], removed: [] };
+  function lines(t) {
+    return t.split('\n').map(function (l) { return l.trim(); }).filter(Boolean);
+  }
+  var p = {}, c = {};
+  lines(prev).forEach(function (l) { p[l] = 1; });
+  lines(cur).forEach(function (l) { c[l] = 1; });
+  return {
+    hasPrev: true,
+    added: lines(cur).filter(function (l) { return !p[l]; }),
+    removed: lines(prev).filter(function (l) { return !c[l]; })
+  };
+}
+
+/* ===================================================================
+   仓库地址解析
+   =================================================================== */
+function parseRepoInput(input) {
+  var s = String(input == null ? '' : input).trim();
+  if (!s) throw new Error('请输入 GitHub 仓库地址');
+  s = s.replace(/^git\+/, '');
+  var ssh = s.match(/^git@[^:]+:(.+)$/);
+  if (ssh) s = ssh[1];
+  s = s.replace(/^https?:\/\//i, '').replace(/^www\./i, '').replace(/^github\.com\//i, '');
+  s = s.replace(/\.git$/i, '').replace(/^\/+/, '');
+  var parts = s.split(/[\/#?]/).filter(Boolean);
+  if (parts.length < 2) throw new Error('地址格式不对，应该像 owner/repo 或 https://github.com/owner/repo');
+  if (!/^[A-Za-z0-9._-]+$/.test(parts[0]) || !/^[A-Za-z0-9._-]+$/.test(parts[1])) {
+    throw new Error('仓库名包含非法字符');
+  }
+  return { owner: parts[0], repo: parts[1], fullName: parts[0] + '/' + parts[1] };
+}
+
+/* ===================================================================
+   GitHub API
+   =================================================================== */
+function ghHeaders() {
+  var h = {
+    'Accept': 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28'
+  };
+  if (DB.settings.githubToken) h['Authorization'] = 'Bearer ' + DB.settings.githubToken;
+  return h;
+}
+
+function ghError(res, body) {
+  if (res.status === 404) return new Error('仓库不存在，或没有 Releases');
+  if (res.status === 401) return new Error('GitHub Token 无效，请到设置里检查');
+  if (res.status === 403 || res.status === 429) {
+    var remain = res.headers.get('x-ratelimit-remaining');
+    var reset = Number(res.headers.get('x-ratelimit-reset') || 0) * 1000;
+    var when = reset > Date.now() ? '，约 ' + fmtRel(reset).replace('后', '') + '后恢复' : '';
+    return new Error('GitHub 访问额度用完了（剩余 ' + (remain == null ? '?' : remain) + '）' + when +
+      '。到设置里填一个 GitHub Token 可以把额度从 60 次/小时提到 5000 次/小时。');
+  }
+  return new Error('GitHub 返回 HTTP ' + res.status + (body ? '：' + String(body).slice(0, 120) : ''));
+}
+
+function fetchReleases(sub, force) {
+  var url = API + '/repos/' + encodeURIComponent(sub.owner) + '/' + encodeURIComponent(sub.repo) + '/releases?per_page=20';
+  var headers = ghHeaders();
+  if (!force && sub.etag) headers['If-None-Match'] = sub.etag;
+
+  return fetch(url, { headers: headers }).then(function (res) {
+    if (res.status === 304) {
+      return { notModified: true, releases: [], etag: sub.etag, remaining: num(res.headers.get('x-ratelimit-remaining')) };
+    }
+    if (!res.ok) {
+      return res.text().then(function (t) { throw ghError(res, t); });
+    }
+    return res.json().then(function (raw) {
+      if (!Array.isArray(raw)) throw new Error('GitHub 返回了非预期的数据');
+      return {
+        notModified: false,
+        etag: res.headers.get('etag') || sub.etag || null,
+        remaining: num(res.headers.get('x-ratelimit-remaining')),
+        releases: raw.filter(function (r) { return r && !r.draft; }).map(function (r) {
+          return {
+            id: Number(r.id),
+            tag: r.tag_name || r.name || String(r.id),
+            name: r.name || r.tag_name || '未命名版本',
+            htmlUrl: r.html_url,
+            publishedAt: r.published_at ? Date.parse(r.published_at) : null,
+            prerelease: !!r.prerelease,
+            body: r.body || '',
+            assets: (r.assets || []).map(function (a) {
+              return { name: a.name, size: a.size, downloads: a.download_count, url: a.browser_download_url };
+            })
+          };
+        })
+      };
+    });
+  });
+}
+function num(v) { var n = Number(v); return isFinite(n) ? n : null; }
+
+function fetchRepoMeta(owner, repo) {
+  return fetch(API + '/repos/' + encodeURIComponent(owner) + '/' + encodeURIComponent(repo), { headers: ghHeaders() })
+    .then(function (res) {
+      if (!res.ok) return null;
+      return res.json().then(function (j) {
+        return {
+          fullName: j.full_name,
+          description: j.description,
+          htmlUrl: j.html_url,
+          stars: j.stargazers_count,
+          archived: j.archived
+        };
+      });
+    })
+    .catch(function () { return null; });
+}
+
+/* ===================================================================
+   订阅 / 快照
+   =================================================================== */
+function getSub(id) {
+  for (var i = 0; i < DB.subs.length; i++) if (DB.subs[i].id === id) return DB.subs[i];
+  return null;
+}
+function findSub(owner, repo) {
+  for (var i = 0; i < DB.subs.length; i++) {
+    if (DB.subs[i].owner.toLowerCase() === owner.toLowerCase() &&
+        DB.subs[i].repo.toLowerCase() === repo.toLowerCase()) return DB.subs[i];
+  }
+  return null;
+}
+function snapsOf(subId) {
+  return DB.snaps.filter(function (s) { return s.subId === subId; }).sort(function (a, b) { return b.id - a.id; });
+}
+function latestSnap(subId) {
+  var l = snapsOf(subId);
+  return l.length ? l[0] : null;
+}
+
+function addSnapshot(o) {
+  var s = {
+    id: nextId('snap'),
+    subId: o.subId,
+    seq: o.seq,
+    kind: o.kind,
+    releaseId: o.releaseId == null ? null : o.releaseId,
+    tag: o.tag || null,
+    name: o.name || null,
+    htmlUrl: o.htmlUrl || null,
+    publishedAt: o.publishedAt || null,
+    capturedAt: o.capturedAt || Date.now(),
+    prerelease: !!o.prerelease,
+    notModified: !!o.notModified,
+    body: String(o.body || '').slice(0, MAX_BODY),
+    assets: o.assets || [],
+    rawFp: o.rawFp,
+    semFp: o.semFp,
+    hadJson: !!o.hadJson,
+    isDuplicate: !!o.isDuplicate,
+    dupReason: o.dupReason || null
+  };
+  DB.snaps.push(s);
+  return s;
+}
+
+function addEvent(e) {
+  DB.events.push({
+    id: nextId('event'),
+    subId: e.subId == null ? null : e.subId,
+    snapId: e.snapId == null ? null : e.snapId,
+    kind: e.kind,
+    title: e.title,
+    body: e.body || '',
+    at: Date.now(),
+    seen: false
+  });
+  trimEvents(EVENT_KEEP);
+}
+
+function newSub(parsed, intervalMinutes, meta) {
+  return {
+    id: nextId('sub'),
+    owner: parsed.owner,
+    repo: parsed.repo,
+    meta: meta || null,
+    intervalMinutes: intervalMinutes,
+    enabled: true,
+    createdAt: Date.now(),
+    lastCheckedAt: null,
+    nextCheckAt: 0,
+    lastChangedAt: null,
+    latestTag: null,
+    latestReleaseId: null,
+    etag: null,
+    lastError: null,
+    errorCount: 0,
+    checkCount: 0,
+    remaining: null
+  };
+}
+
+/* ===================================================================
+   巡检核心
+   =================================================================== */
+var checking = {};
+
+function checkSub(subId, opts) {
+  opts = opts || {};
+  var sub = getSub(subId);
+  if (!sub) return Promise.resolve({ ok: false, error: '订阅不存在' });
+  if (checking[subId]) return Promise.resolve({ ok: false, error: '正在抓取中' });
+  checking[subId] = true;
+
+  var force = !!opts.force;
+  var now = Date.now();
+  var history = snapsOf(subId);
+  var prev = history.length ? history[0] : null;
+  var prevLatestId = sub.latestReleaseId;
+
+  return fetchReleases(sub, force)
+    .then(function (data) {
+      if (data.remaining != null) sub.remaining = data.remaining;
+
+      /* ---- 1) 304：内容没变 ---- */
+      if (data.notModified && prev) {
+        addSnapshot({
+          subId: subId, seq: history.length + 1, kind: 'heartbeat',
+          releaseId: prev.releaseId, tag: prev.tag, name: prev.name, htmlUrl: prev.htmlUrl,
+          publishedAt: prev.publishedAt, prerelease: prev.prerelease,
+          body: prev.body, assets: prev.assets, capturedAt: now, notModified: true,
+          rawFp: prev.rawFp, semFp: prev.semFp, hadJson: prev.hadJson,
+          isDuplicate: true, dupReason: dupText(!!prev.hadJson)
+        });
+        settle(sub, now, data.etag, sub.latestTag, prevLatestId, false);
+        return { ok: true, notModified: true };
+      }
+
+      var releases = data.releases || [];
+      var latest = releases[0] || null;
+
+      /* ---- 2) 一个 Release 都没有 ---- */
+      if (!latest) {
+        var a0 = analyzeBody('');
+        addSnapshot({
+          subId: subId, seq: history.length + 1, kind: 'heartbeat', capturedAt: now,
+          rawFp: a0.rawFp, semFp: a0.semFp,
+          isDuplicate: true, dupReason: '该仓库还没有发布任何 Release'
+        });
+        settle(sub, now, data.etag, null, 0, false);
+        return { ok: true, empty: true };
+      }
+
+      /* ---- 3) 首次订阅：静默补齐 ---- */
+      if (!history.length) {
+        var seed = releases.slice(0, SEED_COUNT).reverse();
+        seed.forEach(function (r, i) {
+          var a = analyzeBody(r.body);
+          addSnapshot({
+            subId: subId, seq: i + 1, kind: 'release',
+            releaseId: r.id, tag: r.tag, name: r.name, htmlUrl: r.htmlUrl,
+            publishedAt: r.publishedAt, prerelease: r.prerelease,
+            body: r.body, assets: r.assets,
+            capturedAt: r.publishedAt || now,
+            rawFp: a.rawFp, semFp: a.semFp, hadJson: a.hadJson,
+            isDuplicate: false
+          });
+        });
+        settle(sub, now, data.etag, latest.tag, latest.id, false);
+        return { ok: true, seeded: seed.length };
+      }
+
+      /* ---- 4) 常规巡检 ---- */
+      var a = analyzeBody(latest.body);
+      var cmp = compareWithPrev(a, prev);
+      var isNewRelease = prevLatestId != null && prevLatestId !== latest.id;
+      var changed = !cmp.isDuplicate;
+      var shouldNotify = isNewRelease || changed;
+
+      var snap = addSnapshot({
+        subId: subId, seq: history.length + 1,
+        kind: shouldNotify ? 'release' : 'heartbeat',
+        releaseId: latest.id, tag: latest.tag, name: latest.name, htmlUrl: latest.htmlUrl,
+        publishedAt: latest.publishedAt, prerelease: latest.prerelease,
+        body: latest.body, assets: latest.assets, capturedAt: now,
+        rawFp: a.rawFp, semFp: a.semFp, hadJson: a.hadJson,
+        isDuplicate: cmp.isDuplicate, dupReason: cmp.reason
+      });
+
+      settle(sub, now, data.etag, latest.tag, latest.id, shouldNotify);
+      pruneSnaps(false);
+
+      if (shouldNotify) {
+        var skipped = releases.filter(function (r) {
+          return prev && prev.publishedAt && r.publishedAt && r.publishedAt > prev.publishedAt;
+        }).length;
+
+        var title = isNewRelease
+          ? (sub.owner + '/' + sub.repo + ' 有新版本 ' + latest.tag)
+          : (sub.owner + '/' + sub.repo + ' 版本说明有更新');
+
+        var bits = [];
+        if (isNewRelease) {
+          bits.push('最新版本：' + latest.tag + (latest.name && latest.name !== latest.tag ? '（' + latest.name + '）' : ''));
+        }
+        if (cmp.isDuplicate) {
+          bits.push(cmp.reason);
+        } else {
+          var dl = buildDiff(latest.body, prev.body);
+          if (dl.added.length) bits.push(dl.added.slice(0, 4).join('\n'));
+          else if (latest.body) bits.push(latest.body.replace(/\s+/g, ' ').slice(0, 200));
+        }
+        if (skipped > 1) bits.push('本次共跨过 ' + skipped + ' 个版本，这里只取最新的一个。');
+
+        addEvent({
+          subId: subId, snapId: snap.id, kind: 'new_release',
+          title: title, body: bits.join('\n')
+        });
+        notify(title, bits.join('\n'), subId, false);
+      }
+
+      return {
+        ok: true, isNewRelease: isNewRelease, changed: changed,
+        duplicate: cmp.isDuplicate, tag: latest.tag, snapshotId: snap.id
+      };
+    })
+    .catch(function (err) {
+      var fails = (sub.errorCount || 0) + 1;
+      var backoff = Math.min(fails * 5, 120);
+      sub.lastCheckedAt = now;
+      sub.lastError = err.message || String(err);
+      sub.errorCount = fails;
+      sub.checkCount = (sub.checkCount || 0) + 1;
+      sub.nextCheckAt = now + backoff * 60000;
+
+      if (fails === 1) {
+        addEvent({ subId: subId, kind: 'error', title: sub.owner + '/' + sub.repo + ' 抓取失败', body: err.message });
+        notify(sub.owner + '/' + sub.repo + ' 抓取失败', err.message, subId, true);
+      }
+      saveDB();
+      return { ok: false, error: err.message };
+    })
+    .then(function (r) {
+      delete checking[subId];
+      saveDB();
+      return r;
+    });
+}
+
+function settle(sub, now, etag, latestTag, latestReleaseId, changed) {
+  sub.lastCheckedAt = now;
+  sub.nextCheckAt = now + Math.max(1, sub.intervalMinutes) * 60000;
+  sub.checkCount = (sub.checkCount || 0) + 1;
+  sub.errorCount = 0;
+  sub.lastError = null;
+  if (etag) sub.etag = etag;
+  sub.latestTag = latestTag || null;
+  sub.latestReleaseId = latestReleaseId == null ? null : latestReleaseId;
+  if (changed) sub.lastChangedAt = now;
+}
+
+/* ===================================================================
+   提醒
+   =================================================================== */
+var audioCtx = null;
+function beep() {
+  if (!DB.settings.notifySound) return;
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    var o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = 'sine';
+    o.frequency.value = 880;
+    g.gain.setValueAtTime(0.0001, audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.13, audioCtx.currentTime + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 0.38);
+    o.connect(g); g.connect(audioCtx.destination);
+    o.start(); o.stop(audioCtx.currentTime + 0.4);
+  } catch (e) { /* 忽略 */ }
+}
+function vibrate() {
+  if (!DB.settings.vibrate) return;
+  try { if (navigator.vibrate) navigator.vibrate([90, 60, 90]); } catch (e) { /* 忽略 */ }
+}
+
+function toast(title, body, kind, onClick) {
+  var host = document.getElementById('toasts');
+  var el = document.createElement('div');
+  el.className = 'toast' + (kind ? ' ' + kind : '');
+  el.innerHTML = '<div class="t-title">' + esc(title) + '</div>' +
+                 (body ? '<div class="t-body">' + esc(body) + '</div>' : '');
+  el.addEventListener('click', function () {
+    el.remove();
+    if (onClick) onClick();
+  });
+  host.appendChild(el);
+  var t = setTimeout(function () {
+    if (!el.parentNode) return;
+    el.classList.add('out');
+    setTimeout(function () { el.remove(); }, 220);
+  }, kind === 'err' ? 12000 : 9000);
+  el.addEventListener('click', function () { clearTimeout(t); });
+  while (host.children.length > 4) host.removeChild(host.firstElementChild);
+}
+
+var flashTimer = null, flashOn = false, savedTitle = null;
+function flashTitle() {
+  if (flashTimer) return;
+  savedTitle = savedTitle || document.title;
+  flashTimer = setInterval(function () {
+    flashOn = !flashOn;
+    document.title = flashOn ? '🔔 有新更新 · 网站订阅' : savedTitle;
+  }, 1200);
+  setTimeout(stopFlash, 60000);
+}
+function stopFlash() {
+  if (flashTimer) { clearInterval(flashTimer); flashTimer = null; }
+  document.title = savedTitle || '网站订阅';
+  flashOn = false;
+}
+document.addEventListener('visibilitychange', function () {
+  if (!document.hidden) stopFlash();
+});
+
+function notify(title, body, subId, isError) {
+  toast(title, body, isError ? 'err' : '', function () {
+    if (subId) location.hash = '#/s/' + subId;
+  });
+  if (!isError) { beep(); vibrate(); flashTitle(); }
+
+  // 系统通知：只在安全上下文（https / localhost / file）且已授权时可用
+  try {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      var n = new Notification(title, {
+        body: body || '',
+        tag: 'grw-' + (subId || 'x'),
+        icon: FAVICON,
+        badge: FAVICON
+      });
+      n.onclick = function () {
+        try { window.focus(); } catch (e) {}
+        if (subId) location.hash = '#/s/' + subId;
+        n.close();
+      };
+    }
+  } catch (e) { /* 忽略 */ }
+}
+var FAVICON = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='112' fill='%230b1220'/%3E%3Cpath d='M256 96c-79 0-143 64-143 143v76l-30 46c-6 9 1 21 12 21h322c11 0 18-12 12-21l-30-46v-76c0-79-64-143-143-143z' fill='%234d9bff'/%3E%3Cpath d='M206 400a50 50 0 0 0 100 0z' fill='%234d9bff'/%3E%3C/svg%3E";
+
+/* ===================================================================
+   弹层
+   =================================================================== */
+function modal(html, onMount) {
+  var mask = document.createElement('div');
+  mask.className = 'modal-mask';
+  mask.innerHTML = '<div class="modal">' + html + '</div>';
+  function close() { mask.remove(); document.body.style.overflow = ''; }
+  mask.addEventListener('click', function (e) { if (e.target === mask) close(); });
+  document.body.style.overflow = 'hidden';
+  document.body.appendChild(mask);
+  $$('[data-close]', mask).forEach(function (b) { b.addEventListener('click', close); });
+  if (onMount) onMount($('.modal', mask), close);
+  return close;
+}
+
+/* ===================================================================
+   视图状态与路由
+   =================================================================== */
+var route = { name: 'list', id: null };
+var openPanels = {};
+var detailLimit = 30;
+var unread = 0;
+
+function parseHash() {
+  var h = location.hash.replace(/^#\/?/, '');
+  var p = h.split('/').filter(Boolean);
+  if (p[0] === 's' && p[1]) return { name: 'detail', id: Number(p[1]) };
+  if (p[0] === 'settings') return { name: 'settings', id: null };
+  return { name: 'list', id: null };
+}
+
+function renderTopbar() {
+  var tb = document.getElementById('topbar');
+  if (route.name === 'detail') {
+    var sub = getSub(route.id);
+    tb.innerHTML =
+      '<button class="icon-btn" data-act="back">←</button>' +
+      '<div class="title">' + esc(sub ? sub.owner + '/' + sub.repo : '订阅') + '</div>' +
+      '<button class="icon-btn" data-act="check" data-id="' + route.id + '">⟳</button>' +
+      '<button class="icon-btn" data-act="more" data-id="' + route.id + '">⋯</button>';
+    return;
+  }
+  if (route.name === 'settings') {
+    tb.innerHTML =
+      '<button class="icon-btn" data-act="back">←</button>' +
+      '<div class="title">设置</div>';
+    return;
+  }
+  tb.innerHTML =
+    '<div class="title">网站订阅</div>' +
+    '<button class="icon-btn" data-act="events">🔔' +
+      (unread ? '<span class="dot-badge">' + (unread > 99 ? '99+' : unread) + '</span>' : '') +
+    '</button>' +
+    '<button class="icon-btn" data-act="settings">⚙</button>';
+}
+
+function render() {
+  renderTopbar();
+  if (route.name === 'detail') renderDetail();
+  else if (route.name === 'settings') renderSettings();
+  else renderList();
+  restorePanels();
+}
+
+/* ---------------------------------------------------------- 列表页 */
+function subCardHtml(sub) {
+  var st = statusOf(sub);
+  var n = snapsOf(sub.id).length;
+  return '' +
+  '<a class="card" href="#/s/' + sub.id + '">' +
+    '<div class="row-between">' +
+      '<h2 class="sub-title">' + esc(sub.owner + '/' + sub.repo) + '</h2>' +
+      '<span class="badge ' + st.cls + '">' + st.text + '</span>' +
+    '</div>' +
+    '<div class="sub-link">https://github.com/' + esc(sub.owner + '/' + sub.repo) + '/releases</div>' +
+    '<div class="meta-list">' +
+      '<div><span class="lbl">更新频率：</span><span class="val">' + sub.intervalMinutes + '分钟</span></div>' +
+      '<div><span class="lbl">最后更新：</span><span class="val">' + (sub.lastChangedAt ? fmtRel(sub.lastChangedAt) : '暂无更新') + '</span></div>' +
+      '<div><span class="lbl">下次更新：</span><span class="val">' + fmtShort(sub.nextCheckAt) + '</span></div>' +
+      '<div><span class="lbl">创建时间：</span><span class="val">' + fmtShort(sub.createdAt) + '</span></div>' +
+      (sub.lastError ? '<div><span class="lbl">最近异常：</span><span class="val warn">' + esc(sub.lastError) + '</span></div>' : '') +
+    '</div>' +
+    '<div class="section-head" style="margin:12px 0 0">' +
+      '<span class="count">共 ' + n + ' 次巡检' + (sub.latestTag ? ' · 最新 ' + esc(sub.latestTag) : '') +
+        (sub.meta && sub.meta.stars != null ? ' · ⭐ ' + sub.meta.stars : '') + '</span>' +
+      '<span class="count">查看详情 ›</span>' +
+    '</div>' +
+  '</a>';
+}
+
+function renderList() {
+  var v = document.getElementById('view');
+  if (!DB.subs.length) {
+    v.innerHTML =
+      '<div class="empty">' +
+        '<div class="big">📡</div>' +
+        '<p><b>还没有订阅任何仓库</b></p>' +
+        '<p>点下面的按钮，粘贴一个 GitHub 仓库地址就行</p>' +
+        '<p style="margin-top:16px">例如：https://github.com/eugeniosegala/MAKO</p>' +
+        '<div style="margin-top:22px"><button class="btn-ghost" data-act="add">＋ 添加第一个订阅</button></div>' +
+        '<div style="margin-top:26px" class="note-box" style="text-align:left">' +
+          '<b>提示：</b>只要这个页面开着，就会按你设的频率自动检查更新并弹提醒。' +
+          '页面关掉后不再检查，重新打开会立刻补检查一次。' +
+        '</div>' +
+      '</div>';
+    return;
+  }
+  var running = DB.subs.filter(function (s) { return s.enabled; }).length;
+  v.innerHTML =
+    '<div class="section-head" style="margin-top:8px">' +
+      '<h3>已订阅 ' + DB.subs.length + ' 个仓库</h3>' +
+      '<span class="count">' + running + ' 个运行中</span>' +
+    '</div>' +
+    DB.subs.slice().sort(function (a, b) { return b.createdAt - a.createdAt; }).map(subCardHtml).join('') +
+    '<div style="height:70px"></div>' +
+    '<button class="fab" data-act="add">＋</button>';
+}
+
+/* ---------------------------------------------------------- 详情页 */
+/** 从 Release 原文里剔除对「有什么更新」没意义、还容易撑宽页面的行 */
+function meaningfulLines(lines) {
+  return lines
+    .filter(function (l) {
+      if (!l) return false;
+      if (/^[-=_*\s]{3,}$/.test(l)) return false;            // 分隔线
+      if (/^https?:\/\/\S+$/.test(l)) return false;          // 纯链接
+      if (/^<[^>]+>$/.test(l)) return false;                 // 纯 HTML 标签（release notes 里常是图片/徽章）
+      if (/^!\[[^\]]*\]\([^)]*\)$/.test(l)) return false;    // 纯图片
+      if (/^\[[^\]]*\]\([^)]*\)$/.test(l)) return false;     // 纯链接文本
+      return true;
+    })
+    .map(function (l) {
+      // 逐层剥掉 Markdown 标记，只留人话
+      return l
+        .replace(/^\s*[-*+]\s+/, '')          // 列表符号
+        .replace(/^\s*#{1,6}\s*/, '')          // 标题井号
+        .replace(/^\s*>\s?/, '')               // 引用符号
+        .replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1')   // 图片 → alt
+        .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')    // 链接 → 文字
+        .replace(/<[^>]*>/g, '')               // 行内 HTML
+        .replace(/https?:\/\/\S+/g, '')        // 裸链接
+        .replace(/[*_`~]/g, '')                // 强调符号
+        .replace(/[[\]]/g, '')                 // 残留方括号
+        .replace(/\s+/g, ' ')
+        .trim();
+    })
+    .filter(function (l) { return l.length > 1; });
+}
+
+function summaryHtml(snap, prev) {
+  if (snap.isDuplicate) {
+    return '<div class="sum-body">' + esc(snap.dupReason || dupText(false)) + '</div>';
+  }
+  var html = '';
+  if (snap.kind === 'release' && snap.tag) {
+    html += '<div class="sum-body"><span class="hi">发现新版本 ' + esc(snap.tag) + '</span>' +
+            (snap.prerelease ? ' · 预发布' : '') + '</div>';
+  }
+  var d = prev ? buildDiff(snap.body, prev.body) : { hasPrev: false, added: [] };
+  var added = meaningfulLines(d.added);
+
+  if (added.length) {
+    html += '<div class="sum-body"><ul>' +
+      added.slice(0, 6).map(function (l) {
+        return '<li>' + inlineMdPlain(esc(l.slice(0, 200))) + '</li>';
+      }).join('') + '</ul>' +
+      (added.length > 6
+        ? '<div style="color:var(--muted);font-size:12px">…还有 ' + (added.length - 6) + ' 行变化，点下面「查看变化内容」</div>'
+        : '') +
+      '</div>';
+  } else if (snap.body && snap.body.trim()) {
+    html += '<div class="markdown" style="max-height:180px;overflow:hidden">' +
+            renderMarkdown(snap.body.slice(0, 600)) + '</div>';
+  } else {
+    html += '<div class="sum-body" style="color:var(--muted)">该版本没有填写发布说明</div>';
+  }
+  return html;
+}
+
+function snapBlockHtml(snap, prev, sub) {
+  var isDup = snap.isDuplicate;
+  var kindTag = snap.notModified ? '例行巡检' : (isDup ? '例行巡检' : '发现更新');
+  var assets = (snap.assets || []).filter(function (a) { return a.name; }).slice(0, 12).map(function (a) {
+    return '<div class="asset"><b>' + esc(a.name) + '</b><span>' + sizeText(a.size) +
+      (a.downloads != null ? ' · ' + a.downloads + ' 次下载' : '') + '</span></div>';
+  }).join('');
+
+  var d = (!isDup && prev) ? buildDiff(snap.body, prev.body) : null;
+  var hasDiff = d && d.hasPrev && (d.added.length || d.removed.length);
+  var diffHtml = hasDiff
+    ? d.added.slice(0, 60).map(function (l) { return '<div class="diff-add">+ ' + esc(l) + '</div>'; }).join('') +
+      d.removed.slice(0, 30).map(function (l) { return '<div class="diff-del">- ' + esc(l) + '</div>'; }).join('')
+    : '';
+
+  return '' +
+  '<article class="tl-item' + (isDup ? ' is-dup' : '') + '">' +
+    '<div class="tl-dot"></div>' +
+    '<div class="tl-card">' +
+      '<div class="tl-head">' +
+        '<span class="tl-time">🕘 ' + fmtShort(snap.capturedAt) +
+          '<span class="tag">' + esc(kindTag) + (snap.tag ? ' · ' + esc(snap.tag) : '') + '</span>' +
+        '</span>' +
+        '<button class="btn-snap" data-act="panel" data-target="raw-' + snap.id + '">📷 快照</button>' +
+      '</div>' +
+
+      '<div class="sum-box">' +
+        '<div class="sum-head"><span>📋</span><span class="who">更新摘要</span>' +
+          '<span class="note">（本地规则生成，不联网）</span></div>' +
+        summaryHtml(snap, prev) +
+      '</div>' +
+
+      (hasDiff
+        ? '<button class="tl-toggle" data-act="panel" data-target="diff-' + snap.id + '">📄 查看变化内容 <span class="arrow">▼</span></button>' +
+          '<div class="tl-panel hidden" id="diff-' + snap.id + '">' + diffHtml + '</div>'
+        : '') +
+
+      '<div class="tl-panel hidden" id="raw-' + snap.id + '">' +
+        '<div style="color:var(--muted);margin-bottom:8px;font-size:12px">' +
+          esc(snap.name || snap.tag || '未命名') + ' · 抓取于 ' + fmtFull(snap.capturedAt) +
+          (snap.htmlUrl ? ' · <a href="' + esc(snap.htmlUrl) + '" target="_blank" rel="noopener">在 GitHub 查看</a>' : '') +
+        '</div>' +
+        '<div class="markdown">' + renderMarkdown(snap.body || '（该版本没有填写发布说明）') + '</div>' +
+        (assets ? '<div class="asset-list">' + assets + '</div>' : '') +
+      '</div>' +
+    '</div>' +
+  '</article>';
+}
+
+function renderDetail() {
+  var sub = getSub(route.id);
+  var v = document.getElementById('view');
+  if (!sub) {
+    v.innerHTML = '<div class="empty"><div class="big">⚠️</div><p>订阅不存在</p>' +
+      '<div style="margin-top:16px"><button class="btn-ghost" data-act="back">返回列表</button></div></div>';
+    return;
+  }
+  var all = snapsOf(sub.id);
+  var list = all.slice(0, detailLimit);
+  var st = statusOf(sub);
+
+  v.innerHTML = '' +
+  '<section class="card" style="margin-top:6px">' +
+    '<div class="row-between">' +
+      '<h2 class="sub-title">' + esc(sub.owner + '/' + sub.repo) + '</h2>' +
+      '<span class="badge ' + st.cls + '">' + st.text + '</span>' +
+    '</div>' +
+    '<a class="sub-link" href="https://github.com/' + esc(sub.owner + '/' + sub.repo) + '/releases" target="_blank" rel="noopener">' +
+      'https://github.com/' + esc(sub.owner + '/' + sub.repo) + '/releases</a>' +
+    (sub.meta && sub.meta.description
+      ? '<div style="color:var(--muted);font-size:13px;margin:-4px 0 10px">' + esc(sub.meta.description) + '</div>' : '') +
+    '<div class="meta-list">' +
+      '<div><span class="lbl">更新频率：</span><span class="val">' + sub.intervalMinutes + '分钟</span></div>' +
+      '<div><span class="lbl">最后更新时间：</span><span class="val">' + (sub.lastChangedAt ? fmtRel(sub.lastChangedAt) : '暂无更新') + '</span></div>' +
+      '<div><span class="lbl">下次更新时间：</span><span class="val">' + fmtShort(sub.nextCheckAt) + '</span></div>' +
+      '<div><span class="lbl">创建时间：</span><span class="val">' + fmtShort(sub.createdAt) + '</span></div>' +
+      '<div><span class="lbl">最新版本：</span><span class="val">' + esc(sub.latestTag || '—') + '</span></div>' +
+      '<div><span class="lbl">累计巡检：</span><span class="val">' + (sub.checkCount || 0) + ' 次' +
+        (sub.errorCount ? '（连续失败 ' + sub.errorCount + ' 次）' : '') + '</span></div>' +
+      (sub.remaining != null ? '<div><span class="lbl">GitHub 额度：</span><span class="val">剩余 ' + sub.remaining + ' 次</span></div>' : '') +
+      (sub.lastError ? '<div><span class="lbl">最近异常：</span><span class="val warn">' + esc(sub.lastError) + '</span></div>' : '') +
+    '</div>' +
+  '</section>' +
+
+  '<button class="btn-primary" data-act="report" data-id="' + sub.id + '">查看日报</button>' +
+
+  '<div class="section-head"><h3>更新历史</h3><span class="count">共' + all.length + '次巡检</span></div>' +
+
+  (list.length
+    ? '<div class="timeline">' + list.map(function (s, i) {
+        return snapBlockHtml(s, list[i + 1] || null, sub);
+      }).join('') + '</div>'
+    : '<div class="empty"><p>还没有任何记录</p><p>点右上角 ⟳ 立即抓取一次</p></div>') +
+
+  (all.length > list.length
+    ? '<div style="text-align:center;margin-top:16px"><button class="btn-ghost" data-act="more-snaps">加载更多（还有 ' +
+      (all.length - list.length) + ' 条）</button></div>' : '') +
+  '<div style="height:30px"></div>';
+}
+
+/* ---------------------------------------------------------- 设置页 */
+/** 判断当前是用什么方式打开的，决定能不能发系统通知、数据安不安全 */
+function envInfo() {
+  var p = location.protocol;
+  var host = location.hostname;
+  if (p === 'https:' || host === 'localhost' || host === '127.0.0.1') {
+    return {
+      level: 'ok', name: 'https 网址', canNotify: true,
+      text: '<b>环境很好。</b>系统通知横幅、页面内提醒条、提示音、震动都能用，数据也稳定保存在这个网址下面。'
+    };
+  }
+  if (p === 'file:') {
+    return {
+      level: 'warn', name: '本地文件（file://）', canNotify: false,
+      text: '<b>能用，但系统通知用不了。</b>页面内的蓝色提醒条、提示音、震动都正常；' +
+            '浏览器不允许本地文件发系统通知，这是它的安全限制。<br>' +
+            '数据保存在这个文件路径下，只要路径不变就一直在，但换 https 网址后不会自动带过去。'
+    };
+  }
+  if (p === 'content:') {
+    return {
+      level: 'bad', name: '文件管理器打开（content://）', canNotify: false,
+      text: '<b>⚠️ 这个方式不太稳，建议尽快换成 https 网址。</b><br>' +
+            '① 不能发系统通知。<br>' +
+            '② <b>数据有丢失风险</b>：从文件管理器打开时，每次拿到的地址可能不一样，' +
+            '浏览器会把它们当成不同来源，你的订阅和历史可能会突然看不到。<br>' +
+            '<b>请先点下面的「导出备份」存一份</b>，换成 https 网址后再「导入备份」。'
+    };
+  }
+  return {
+    level: 'warn', name: 'http 网址', canNotify: false,
+    text: '<b>能用，但系统通知用不了。</b>页面内提醒条、提示音、震动都正常；' +
+          '浏览器只在 https 下才允许发系统通知。'
+  };
+}
+
+function notifyPermText() {
+  if (!('Notification' in window)) return '当前浏览器不支持';
+  // file:// 下 isSecureContext 也是 true，但 Chrome 实际上不给通知权限，
+  // 所以这里以 envInfo 的判断为准
+  if (!envInfo().canNotify) return '不可用（需要 https 打开）';
+  var p = Notification.permission;
+  return p === 'granted' ? '已允许' : p === 'denied' ? '已拒绝（需到 Chrome 网站设置里改）' : '未申请';
+}
+
+/** 换成 https 的分步说明 */
+function howtoHtml() {
+  return '' +
+  '<h2>怎么换成 https 打开</h2>' +
+  '<div class="note-box">' +
+    '<b>目标：</b>把这个页面放到一个 https 网址上，然后用那个网址打开。' +
+    '文件里没有任何密码或密钥，公开托管是安全的。' +
+  '</div>' +
+
+  '<h3 style="font-size:15px;margin:16px 0 8px">方式一：Cloudflare Drop（最快，不用注册）</h3>' +
+  '<div class="note-box">' +
+    '1. 手机 Chrome 打开 <a href="https://www.cloudflare.com/drop/" target="_blank" rel="noopener">cloudflare.com/drop</a><br>' +
+    '2. 把 <b>gh-release-watch.html</b> 拖进去（手机上点「选择文件」）<br>' +
+    '3. 几秒后得到一个 <b>https://xxxx.workers.dev</b> 网址<br>' +
+    '4. 用那个网址打开，进设置 →「申请通知权限」→ 允许<br><br>' +
+    '<b>注意：</b>不注册的话这个网址只活 <b>1 小时</b>，适合先试试效果。' +
+    '想长期用，页面上有个 Claim 链接，点进去用 Cloudflare 账号认领就永久了。' +
+  '</div>' +
+
+  '<h3 style="font-size:15px;margin:16px 0 8px">方式二：GitHub Pages（长期有效，推荐）</h3>' +
+  '<div class="note-box">' +
+    '你有 GitHub 账号，这是最稳的做法：<br><br>' +
+    '1. 手机 Chrome 打开 <a href="https://github.com/new" target="_blank" rel="noopener">github.com/new</a>，' +
+       '仓库名随便填（比如 <code>watch</code>），选 <b>Public</b>，点 Create<br>' +
+    '2. 进仓库 → <b>Add file</b> → <b>Upload files</b> → 选 <b>gh-release-watch.html</b> → 点 Commit<br>' +
+    '3. 仓库 → <b>Settings</b> → 左边找到 <b>Pages</b><br>' +
+    '4. Source 选 <b>Deploy from a branch</b>，Branch 选 <b>main</b> + <b>/ (root)</b>，点 Save<br>' +
+    '5. 等 1~2 分钟，你的网址就是：<br>' +
+       '<code>https://你的用户名.github.io/watch/gh-release-watch.html</code><br><br>' +
+    '用这个网址打开 → 申请通知权限 → 允许 → 加到主屏幕。' +
+  '</div>' +
+
+  '<h3 style="font-size:15px;margin:16px 0 8px">换成新网址之后别忘了</h3>' +
+  '<div class="note-box warn">' +
+    '新网址是一个全新的存储空间，<b>原来的订阅不会自动带过去</b>。<br>' +
+    '所以在换之前，先在旧页面点「导出备份」存一个 JSON 文件；' +
+    '用新网址打开后，进设置点「导入备份」选那个文件就恢复了。' +
+  '</div>' +
+
+  '<button class="btn-primary" style="margin-top:16px" data-close>知道了</button>' +
+  '<div class="btn-row"><button class="btn-ghost" id="ht-export">先导出备份</button></div>';
+}
+
+function renderSettings() {
+  var v = document.getElementById('view');
+  var s = DB.settings;
+  var totalSnaps = DB.snaps.length;
+  var size = bytesOfDB();
+  var env = envInfo();
+
+  v.innerHTML = '' +
+  '<div class="section-head" style="margin-top:8px"><h3>运行环境</h3></div>' +
+  '<div class="card">' +
+    '<div class="meta-list">' +
+      '<div><span class="lbl">打开方式：</span><span class="val' + (env.level === 'ok' ? '' : ' warn') + '">' + esc(env.name) + '</span></div>' +
+      '<div><span class="lbl">系统通知：</span><span class="val' + (env.canNotify ? '' : ' warn') + '">' +
+        (env.canNotify ? '可以发送' : '不能发送') + '</span></div>' +
+      '<div><span class="lbl">通知权限：</span><span class="val">' + notifyPermText() + '</span></div>' +
+    '</div>' +
+    '<div class="note-box' + (env.level === 'ok' ? '' : ' warn') + '" style="margin-top:12px">' + env.text + '</div>' +
+    '<div class="btn-row">' +
+      '<button class="btn-ghost" data-act="howto">换成 https 打开</button>' +
+      '<button class="btn-ghost" data-act="export">导出备份</button>' +
+    '</div>' +
+  '</div>' +
+
+  '<div class="section-head"><h3>提醒</h3></div>' +
+  '<div class="card">' +
+    '<div class="switch-row">' +
+      '<div class="txt"><strong>提示音</strong><span>收到更新时响一声</span></div>' +
+      '<div class="switch' + (s.notifySound ? ' on' : '') + '" data-act="toggle" data-key="notifySound"></div>' +
+    '</div>' +
+    '<div class="switch-row">' +
+      '<div class="txt"><strong>震动</strong><span>安卓手机上会震动两下</span></div>' +
+      '<div class="switch' + (s.vibrate ? ' on' : '') + '" data-act="toggle" data-key="vibrate"></div>' +
+    '</div>' +
+    '<div class="btn-row" style="margin-top:12px">' +
+      '<button class="btn-ghost" data-act="ask-notify">申请通知权限</button>' +
+      '<button class="btn-ghost" data-act="test-notify">测试提醒</button>' +
+    '</div>' +
+  '</div>' +
+
+  '<div class="section-head"><h3>抓取</h3></div>' +
+  '<div class="card">' +
+    '<div class="field">' +
+      '<label>GitHub Token（可选，建议填）</label>' +
+      '<input type="password" id="set-gh" placeholder="' + (s.githubToken ? '已保存，留空则不修改' : 'ghp_... 留空也能用') + '" autocomplete="off">' +
+      '<div class="hint">不填每小时只能请求 60 次，填了可以到 5000 次/小时，还能看私有仓库。' +
+      '只需要勾 <b>public_repo</b> 权限。生成地址：github.com/settings/tokens</div>' +
+    '</div>' +
+    '<div class="field">' +
+      '<label>新订阅的默认更新频率</label>' +
+      '<select id="set-interval">' +
+        [[60, '1 小时'], [360, '6 小时'], [720, '12 小时'], [1440, '1 天'], [2400, '40 小时'], [10080, '7 天']]
+          .map(function (o) {
+            return '<option value="' + o[0] + '"' + (s.defaultIntervalMinutes === o[0] ? ' selected' : '') + '>' + o[1] + '</option>';
+          }).join('') +
+      '</select>' +
+    '</div>' +
+    '<div class="field">' +
+      '<label>页面开着的检查间隔（秒）</label>' +
+      '<select id="set-check">' +
+        [[15, '15 秒'], [30, '30 秒'], [60, '1 分钟'], [300, '5 分钟']]
+          .map(function (o) {
+            return '<option value="' + o[0] + '"' + (s.checkSeconds === o[0] ? ' selected' : '') + '>' + o[1] + '</option>';
+          }).join('') +
+      '</select>' +
+      '<div class="hint">只决定「多久看一眼有没有该检查的订阅」，真正抓取的频率由每个订阅的更新频率决定。</div>' +
+    '</div>' +
+    '<div class="btn-row">' +
+      '<button class="btn-ghost" data-act="check-all">立即全部检查</button>' +
+      (s.githubToken ? '<button class="btn-ghost" data-act="clear-gh">清除 Token</button>' : '') +
+    '</div>' +
+  '</div>' +
+
+  '<div class="section-head"><h3>数据</h3></div>' +
+  '<div class="card">' +
+    '<dl class="kv-grid">' +
+      '<dt>订阅数</dt><dd>' + DB.subs.length + ' 个</dd>' +
+      '<dt>历史记录</dt><dd>' + totalSnaps + ' 条</dd>' +
+      '<dt>占用空间</dt><dd>' + sizeText(size) + '（浏览器上限约 5 MB）</dd>' +
+    '</dl>' +
+    '<div class="btn-row">' +
+      '<button class="btn-ghost" data-act="export">导出备份</button>' +
+      '<button class="btn-ghost" data-act="import">导入备份</button>' +
+    '</div>' +
+    '<div class="btn-row">' +
+      '<button class="btn-ghost" data-act="clear-snaps">清理历史记录</button>' +
+      '<button class="btn-ghost" data-act="wipe" style="background:rgba(239,68,68,.14);color:#ff9a9a">清空全部数据</button>' +
+    '</div>' +
+  '</div>' +
+
+  '<div class="section-head"><h3>怎么用</h3></div>' +
+  '<div class="card">' +
+    '<div class="note-box">' +
+      '<b>· 这个页面必须开着才会检查更新。</b><br>' +
+      '页面关掉、手机锁屏太久，都不会抓取；重新打开会立刻补检查一次，错过的更新会一次性提醒你。<br><br>' +
+
+      '<b>· 收到提醒的三种方式</b><br>' +
+      '<b>1. 页面顶部蓝色提醒条</b> —— 任何情况下都有效，这是最基本的一层<br>' +
+      '<b>2. 提示音 + 震动</b> —— 上面的开关控制；安卓手机上还会震动两下<br>' +
+      '<b>3. 系统通知横幅</b> —— 就是那种从屏幕顶部滑下来、在你用别的 App 时也能看到的通知。<br>' +
+      '<span style="color:var(--amber)">它必须满足两个条件：用 https 网址打开 + 授权通知。</span>' +
+      '当前是' + esc(env.name) + '，' + (env.canNotify ? '<b style="color:var(--green)">已满足</b>' : '<b style="color:var(--amber)">还没满足</b>') + '。<br><br>' +
+
+      '<b>· 想让它更省心？</b><br>' +
+      '两步：<b>①</b> 把页面放到 https 网址上（点上面的「换成 https 打开」有详细步骤）；' +
+      '<b>②</b> 用那个网址打开后，Chrome 右上角 <b>⋮</b> →「添加到主屏幕」。<br>' +
+      '这样桌面上会多一个图标，点开直接用，不用每次翻文件管理器；' +
+      '在使用别的 App 时，更新提醒也会以系统横幅的形式弹出来。' +
+    '</div>' +
+  '</div>' +
+  '<div style="text-align:center;font-size:12px;padding:18px 0 40px;color:var(--muted)">' +
+    '网站订阅 · 单文件版 · 数据只存在这台手机的浏览器里' +
+  '</div>';
+}
+
+/* ===================================================================
+   本地日报（不调用 AI）
+   =================================================================== */
+function buildReport(subId, days) {
+  var sub = getSub(subId);
+  if (!sub) throw new Error('订阅不存在');
+  var end = Date.now();
+  var start = end - days * 86400000;
+  var inRange = snapsOf(subId).filter(function (s) { return s.capturedAt >= start && s.capturedAt <= end; })
+                              .sort(function (a, b) { return a.capturedAt - b.capturedAt; });
+  if (!inRange.length) throw new Error('这个时间范围内还没有任何巡检记录');
+
+  var changed = inRange.filter(function (s) { return !s.isDuplicate; });
+  var versions = {};
+  changed.forEach(function (s) { if (s.tag) versions[s.tag] = s; });
+  var tagList = Object.keys(versions);
+
+  var L = [];
+  L.push('# 更新日报');
+  L.push('');
+  L.push('**仓库**：' + sub.owner + '/' + sub.repo);
+  L.push('**统计范围**：' + fmtFull(start) + ' ~ ' + fmtFull(end));
+  L.push('**巡检次数**：' + inRange.length + ' 次，其中有变化 ' + changed.length + ' 次');
+  L.push('');
+  L.push('**本期概览**');
+  L.push(changed.length
+    ? '- 这段时间共发现 ' + tagList.length + ' 个版本变化，最近一次是 ' + (tagList[tagList.length - 1] || '未知版本') + '。'
+    : '- 本期没有实质更新，' + inRange.length + ' 次巡检内容都完全一致。');
+  L.push('');
+
+  if (changed.length) {
+    L.push('**关键变化**');
+    changed.slice().reverse().forEach(function (s) {
+      L.push('- ' + fmtShort(s.capturedAt) + ' · ' + (s.tag || '未知版本') +
+        (s.prerelease ? '（预发布）' : ''));
+    });
+    L.push('');
+    L.push('**版本明细**');
+    var seen = {};
+    changed.forEach(function (s) {
+      var key = s.tag || ('snap-' + s.id);
+      if (seen[key]) return;
+      seen[key] = 1;
+      var d = buildDiff(s.body, (snapsOf(subId).filter(function (x) { return x.id < s.id; })[0] || {}).body);
+      L.push('### ' + (s.tag || '未命名版本'));
+      L.push('- 时间：' + fmtFull(s.capturedAt) + (s.publishedAt ? '（发布于 ' + fmtFull(s.publishedAt) + '）' : ''));
+      var items = meaningfulLines(d.added).slice(0, 5);
+      if (items.length) {
+        items.forEach(function (l) { L.push('  - ' + l.slice(0, 160)); });
+      } else if (s.body) {
+        L.push('  - ' + s.body.replace(/\s+/g, ' ').slice(0, 160));
+      } else {
+        L.push('  - 该版本没有填写发布说明');
+      }
+      L.push('');
+    });
+  }
+
+  var dups = inRange.filter(function (s) { return s.isDuplicate; });
+  if (dups.length) {
+    L.push('**例行巡检（内容无变化）**');
+    L.push('- 共 ' + dups.length + ' 次：' +
+      dups.map(function (s) { return fmtShort(s.capturedAt); }).slice(-10).join('、') +
+      (dups.length > 10 ? ' 等' : ''));
+    L.push('');
+  }
+  return { text: L.join('\n'), start: start, end: end, count: inRange.length };
+}
+
+/* ===================================================================
+   面板展开状态
+   =================================================================== */
+function restorePanels() {
+  Object.keys(openPanels).forEach(function (id) {
+    var el = document.getElementById(id);
+    if (el) el.classList.remove('hidden');
+    var btn = document.querySelector('[data-act="panel"][data-target="' + id + '"]');
+    if (btn) btn.classList.add('open');
+  });
+}
+
+/* ===================================================================
+   交互
+   =================================================================== */
+var actions = {
+  back: function () { location.hash = '#/'; },
+  settings: function () { location.hash = '#/settings'; },
+
+  panel: function (el) {
+    var id = el.getAttribute('data-target');
+    var box = document.getElementById(id);
+    if (!box) return;
+    var hidden = box.classList.toggle('hidden');
+    el.classList.toggle('open', !hidden);
+    if (hidden) delete openPanels[id]; else openPanels[id] = 1;
+  },
+
+  'more-snaps': function () {
+    detailLimit += 30;
+    render();
+  },
+
+  check: function (el) {
+    var id = Number(el.getAttribute('data-id'));
+    el.textContent = '…';
+    checkSub(id, { force: true }).then(function (r) {
+      el.textContent = '⟳';
+      if (r.ok === false) { toast('检查失败', r.error, 'err'); return; }
+      if (r.seeded) toast('检查完成', '已记录 ' + r.seeded + ' 个版本', 'ok');
+      else if (r.isNewRelease) toast('发现新版本', r.tag, 'ok');
+      else if (r.duplicate) toast('内容没有变化', r.tag ? '仍是 ' + r.tag : '', '');
+      else toast('检查完成', '', 'ok');
+      render();
+    });
+  },
+
+  more: function (el) {
+    var id = Number(el.getAttribute('data-id'));
+    var sub = getSub(id);
+    if (!sub) return;
+    modal(
+      '<h2>' + esc(sub.owner + '/' + sub.repo) + '</h2>' +
+      '<div class="field"><label>更新频率</label><div class="pill-row" id="iv">' +
+        [[60, '1小时'], [360, '6小时'], [720, '12小时'], [1440, '1天'], [2400, '40小时'], [10080, '7天']]
+          .map(function (o) {
+            return '<button class="pill' + (sub.intervalMinutes === o[0] ? ' active' : '') + '" data-min="' + o[0] + '">' + o[1] + '</button>';
+          }).join('') +
+      '</div><div class="hint">当前：' + sub.intervalMinutes + ' 分钟一次</div></div>' +
+      '<div class="switch-row"><div class="txt"><strong>启用监控</strong><span>关闭后不再自动检查</span></div>' +
+        '<div class="switch' + (sub.enabled ? ' on' : '') + '" id="en"></div></div>' +
+      '<button class="btn-primary" id="save" style="margin-top:16px">保存</button>' +
+      '<button class="btn-primary" id="del" style="margin-top:12px;background:#3a2029;color:#ff9a9a">删除订阅</button>',
+      function (root, close) {
+        var interval = sub.intervalMinutes, enabled = sub.enabled;
+        $$('#iv .pill', root).forEach(function (b) {
+          b.addEventListener('click', function () {
+            interval = Number(b.getAttribute('data-min'));
+            $$('#iv .pill', root).forEach(function (x) { x.classList.remove('active'); });
+            b.classList.add('active');
+          });
+        });
+        var en = $('#en', root);
+        en.addEventListener('click', function () {
+          enabled = !enabled;
+          en.classList.toggle('on', enabled);
+        });
+        $('#save', root).addEventListener('click', function () {
+          sub.intervalMinutes = interval;
+          sub.enabled = enabled;
+          sub.nextCheckAt = enabled ? 0 : sub.nextCheckAt;
+          saveDB();
+          close();
+          toast('已保存', '', 'ok');
+          render();
+        });
+        $('#del', root).addEventListener('click', function () {
+          if (!confirm('确定删除这个订阅吗？它的历史记录会一起删掉。')) return;
+          DB.subs = DB.subs.filter(function (s) { return s.id !== id; });
+          DB.snaps = DB.snaps.filter(function (s) { return s.subId !== id; });
+          DB.events = DB.events.filter(function (e) { return e.subId !== id; });
+          saveDB();
+          close();
+          location.hash = '#/';
+          render();
+        });
+      }
+    );
+  },
+
+  add: function () {
+    var def = DB.settings.defaultIntervalMinutes;
+    modal(
+      '<h2>添加订阅</h2>' +
+      '<div class="field"><label>GitHub 仓库地址</label>' +
+        '<input type="text" id="url" placeholder="https://github.com/owner/repo" autocapitalize="off" autocorrect="off" spellcheck="false">' +
+        '<div class="hint">完整地址、owner/repo、SSH 地址都行，直接粘贴 Releases 页面地址也可以。</div></div>' +
+      '<div class="field"><label>更新频率</label><div class="pill-row" id="iv">' +
+        [[60, '1小时'], [360, '6小时'], [720, '12小时'], [1440, '1天'], [2400, '40小时'], [10080, '7天']]
+          .map(function (o) {
+            return '<button class="pill' + (def === o[0] ? ' active' : '') + '" data-min="' + o[0] + '">' + o[1] + '</button>';
+          }).join('') +
+      '</div></div>' +
+      '<button class="btn-primary" id="go">添加并立即抓取</button>' +
+      '<div class="hint" style="margin-top:10px">添加后会先静默补齐最近 ' + SEED_COUNT + ' 个版本，不会马上刷屏提醒你。</div>',
+      function (root, close) {
+        var interval = def;
+        $$('#iv .pill', root).forEach(function (b) {
+          b.addEventListener('click', function () {
+            interval = Number(b.getAttribute('data-min'));
+            $$('#iv .pill', root).forEach(function (x) { x.classList.remove('active'); });
+            b.classList.add('active');
+          });
+        });
+        var input = $('#url', root);
+        setTimeout(function () { input.focus(); }, 120);
+
+        function go() {
+          var url = input.value.trim();
+          if (!url) { toast('请填写仓库地址', '', 'err'); return; }
+          var parsed;
+          try { parsed = parseRepoInput(url); }
+          catch (e) { toast('地址不对', e.message, 'err'); return; }
+          if (findSub(parsed.owner, parsed.repo)) { toast('已经订阅过了', parsed.fullName, 'err'); return; }
+
+          var btn = $('#go', root);
+          btn.disabled = true;
+          btn.innerHTML = '<span class="spinner"></span>正在抓取…';
+
+          fetchRepoMeta(parsed.owner, parsed.repo).then(function (meta) {
+            var sub = newSub(parsed, interval, meta);
+            DB.subs.push(sub);
+            saveDB();
+            return checkSub(sub.id, { force: true }).then(function (r) {
+              if (r.ok === false) {
+                DB.subs = DB.subs.filter(function (s) { return s.id !== sub.id; });
+                DB.snaps = DB.snaps.filter(function (s) { return s.subId !== sub.id; });
+                saveDB();
+                throw new Error(r.error);
+              }
+              return r;
+            });
+          }).then(function (r) {
+            close();
+            toast('订阅成功', parsed.fullName + ' 已记录 ' + (r.seeded || 0) + ' 个版本', 'ok');
+            location.hash = '#/s/' + findSub(parsed.owner, parsed.repo).id;
+            render();
+          }).catch(function (e) {
+            btn.disabled = false;
+            btn.textContent = '添加并立即抓取';
+            toast('添加失败', e.message || String(e), 'err');
+          });
+        }
+        $('#go', root).addEventListener('click', go);
+        input.addEventListener('keydown', function (e) { if (e.key === 'Enter') go(); });
+      }
+    );
+  },
+
+  report: function (el) {
+    var id = Number(el.getAttribute('data-id'));
+    var days = 7;
+    modal(
+      '<h2>更新日报</h2>' +
+      '<div class="field"><label>统计范围</label><div class="pill-row" id="days">' +
+        [[1, '最近 1 天'], [3, '最近 3 天'], [7, '最近 7 天'], [30, '最近 30 天']]
+          .map(function (o, i) {
+            return '<button class="pill' + (i === 2 ? ' active' : '') + '" data-d="' + o[0] + '">' + o[1] + '</button>';
+          }).join('') +
+      '</div></div>' +
+      '<button class="btn-primary" id="gen">生成日报</button>' +
+      '<div id="out" style="margin-top:16px"></div>',
+      function (root) {
+        $$('#days .pill', root).forEach(function (b) {
+          b.addEventListener('click', function () {
+            days = Number(b.getAttribute('data-d'));
+            $$('#days .pill', root).forEach(function (x) { x.classList.remove('active'); });
+            b.classList.add('active');
+          });
+        });
+        var out = $('#out', root);
+        function gen() {
+          try {
+            var rep = buildReport(id, days);
+            out.innerHTML = '<div class="sum-box"><div class="sum-head"><span>📋</span>' +
+              '<span class="who">日报</span><span class="note">（本地生成，' + rep.count + ' 次巡检）</span></div>' +
+              '<div class="sum-body markdown">' + renderMarkdown(rep.text) + '</div></div>';
+          } catch (e) {
+            out.innerHTML = '<div class="sum-body err">⚠️ ' + esc(e.message) + '</div>';
+          }
+        }
+        $('#gen', root).addEventListener('click', gen);
+        gen();
+      }
+    );
+  },
+
+  events: function () {
+    unread = 0;
+    DB.events.forEach(function (e) { e.seen = true; });
+    saveDB();
+    renderTopbar();
+    var list = DB.events.slice().reverse();
+    modal(
+      '<h2>更新提醒</h2>' +
+      (list.length
+        ? list.map(function (e) {
+            return '<div class="evt-item"><div class="e-title">' + (e.kind === 'error' ? '⚠️ ' : '🔔 ') +
+              esc(e.title) + '</div><div class="e-body">' + esc(e.body) + '</div>' +
+              '<div class="e-time">' + fmtFull(e.at) + '</div></div>';
+          }).join('')
+        : '<div style="color:var(--muted);padding:20px 0;text-align:center">还没有任何提醒</div>') +
+      '<button class="btn-primary" style="margin-top:16px" data-close>关闭</button>'
+    );
+  },
+
+  toggle: function (el) {
+    var key = el.getAttribute('data-key');
+    var on = el.classList.contains('on');
+    el.classList.toggle('on', !on);
+    DB.settings[key] = !on;
+    saveDB();
+  },
+
+  howto: function () {
+    modal(howtoHtml(), function (root, close) {
+      var b = root.querySelector('#ht-export');
+      if (b) b.addEventListener('click', function () { close(); actions.export(); });
+    });
+  },
+
+  'ask-notify': function () {
+    if (!('Notification' in window)) { toast('当前浏览器不支持系统通知', '', 'err'); return; }
+    if (!envInfo().canNotify) {
+      modal(
+        '<h2>还差一步</h2>' +
+        '<div class="note-box warn">' + envInfo().text + '</div>' +
+        '<div class="note-box" style="margin-top:12px">' +
+        '<b>页面内的提醒不受影响</b>，蓝色的提醒条、提示音、震动照常工作。<br>' +
+        '想要那种从屏幕顶部滑下来的系统通知横幅，需要先用 https 网址打开这个页面。' +
+        '</div>' +
+        '<button class="btn-primary" style="margin-top:16px" data-close>知道了</button>' +
+        '<div class="btn-row"><button class="btn-ghost" id="an-howto">看怎么换成 https</button></div>',
+        function (root, close) {
+          root.querySelector('#an-howto').addEventListener('click', function () { close(); actions.howto(); });
+        }
+      );
+      return;
+    }
+    Notification.requestPermission().then(function (p) {
+      render();
+      if (p === 'granted') toast('已开启系统通知', '收到更新时会从屏幕顶部弹出来', 'ok');
+      else if (p === 'denied') toast('通知权限被拒绝', '可以到 Chrome 的「网站设置 → 通知」里手动改回来', 'err');
+      else toast('未获得通知权限', '', 'err');
+    });
+  },
+
+  'test-notify': function () {
+    if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+    notify('这是一条测试提醒', '能看到这个蓝色条，说明提醒功能是正常的 👍', null, false);
+  },
+
+  'check-all': function (el) {
+    var subs = DB.subs.filter(function (s) { return s.enabled; });
+    if (!subs.length) { toast('还没有订阅', '', 'err'); return; }
+    el.textContent = '检查中…';
+    var i = 0, changed = 0;
+    function step() {
+      if (i >= subs.length) {
+        el.textContent = '立即全部检查';
+        toast('检查完成', '共 ' + subs.length + ' 个订阅，' + (changed ? '发现 ' + changed + ' 处更新' : '没有新变化'), 'ok');
+        render();
+        return;
+      }
+      var s = subs[i++];
+      checkSub(s.id, { force: true }).then(function (r) {
+        if (r && (r.isNewRelease || r.changed)) changed++;
+        setTimeout(step, 250);
+      });
+    }
+    step();
+  },
+
+  'clear-gh': function () {
+    DB.settings.githubToken = '';
+    saveDB();
+    render();
+    toast('已清除 GitHub Token', '', 'ok');
+  },
+
+  export: function () {
+    var payload = {
+      app: 'gh-release-watch-standalone',
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      data: DB
+    };
+    var blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'gh-release-watch-' + new Date().toISOString().slice(0, 10) + '.json';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    toast('已导出备份', '文件已保存到手机的下载目录', 'ok');
+  },
+
+  import: function () {
+    var input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json,application/json';
+    input.addEventListener('change', function () {
+      var f = input.files && input.files[0];
+      if (!f) return;
+      var reader = new FileReader();
+      reader.onload = function () {
+        try {
+          var parsed = JSON.parse(String(reader.result));
+          var incoming = parsed.data || parsed;
+          if (!incoming || !Array.isArray(incoming.subs)) throw new Error('文件格式不对');
+          if (!confirm('导入会覆盖当前所有订阅和数据，确定继续吗？')) return;
+          DB = Object.assign(defaultDB(), incoming);
+          DB.settings = Object.assign(defaultDB().settings, incoming.settings || {});
+          saveDB();
+          render();
+          toast('导入成功', DB.subs.length + ' 个订阅已恢复', 'ok');
+        } catch (e) {
+          toast('导入失败', e.message || String(e), 'err');
+        }
+      };
+      reader.readAsText(f);
+    });
+    input.click();
+  },
+
+  'clear-snaps': function () {
+    if (!confirm('清空所有历史记录吗？订阅会保留，下次检查会重新开始记录。')) return;
+    DB.snaps = [];
+    DB.events = [];
+    saveDB();
+    render();
+    toast('已清理历史记录', '', 'ok');
+  },
+
+  wipe: function () {
+    if (!confirm('清空全部数据吗？所有订阅和历史都会被删除，无法恢复。')) return;
+    DB = defaultDB();
+    saveDB();
+    location.hash = '#/';
+    render();
+    toast('已清空', '', 'ok');
+  }
+};
+
+document.addEventListener('click', function (e) {
+  var el = e.target.closest ? e.target.closest('[data-act]') : null;
+  if (!el) return;
+  var fn = actions[el.getAttribute('data-act')];
+  if (!fn) return;
+  e.preventDefault();
+  e.stopPropagation();
+  try { fn(el); } catch (err) { toast('操作失败', err.message || String(err), 'err'); }
+});
+
+window.addEventListener('hashchange', function () {
+  route = parseHash();
+  openPanels = {};
+  render();
+  window.scrollTo(0, 0);
+  // 切到详情页时，如果这个订阅很久没查了就顺手查一次
+  if (route.name === 'detail') {
+    var s = getSub(route.id);
+    if (s && Date.now() >= (s.nextCheckAt || 0)) {
+      checkSub(s.id).then(function () { render(); });
+    }
+  }
+});
+
+/* ===================================================================
+   调度
+   =================================================================== */
+var checkTimer = null;
+
+function tick() {
+  if (document.hidden) return;
+  var now = Date.now();
+  var due = DB.subs.filter(function (s) {
+    return s.enabled && now >= (s.nextCheckAt || 0);
+  });
+  if (!due.length) return;
+  var i = 0;
+  (function step() {
+    if (i >= due.length) { render(); return; }
+    var s = due[i++];
+    if (!getSub(s.id)) { step(); return; }
+    checkSub(s.id).then(function () {
+      setTimeout(function () {
+        if (route.name === 'list' || (route.name === 'detail' && route.id === s.id)) render();
+        step();
+      }, 300);
+    });
+  })();
+}
+
+function restartTimer() {
+  if (checkTimer) clearInterval(checkTimer);
+  var sec = Math.max(10, Number(DB.settings.checkSeconds) || 30);
+  checkTimer = setInterval(tick, sec * 1000);
+}
+
+document.addEventListener('visibilitychange', function () {
+  if (!document.hidden) tick();
+});
+
+window.addEventListener('storage', function (e) {
+  if (e.key === LS_KEY) { DB = loadDB(); render(); }
+});
+
+/* 首次交互解锁音频 */
+document.addEventListener('touchstart', function () {
+  if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+}, { once: true });
+document.addEventListener('click', function () {
+  if (!audioCtx) { try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+}, { once: true });
+
+/* ===================================================================
+   启动
+   =================================================================== */
+function boot() {
+  route = parseHash();
+  unread = DB.events.filter(function (e) { return !e.seen; }).length;
+  render();
+  restartTimer();
+  setTimeout(tick, 400);
+  setTimeout(envWarningOnce, 1500);
+}
+
+/** 用 content:// 这类不稳的方式打开时，第一次弹一次提示，先把备份提上来 */
+function envWarningOnce() {
+  var env = envInfo();
+  if (env.level !== 'bad') return;
+  var flag = 'grw.envWarned.v1';
+  try { if (localStorage.getItem(flag)) return; } catch (e) { return; }
+  try { localStorage.setItem(flag, '1'); } catch (e) { /* 忽略 */ }
+  modal(
+    '<h2>⚠️ 建议换个方式打开</h2>' +
+    '<div class="note-box warn">' + env.text + '</div>' +
+    '<div class="note-box" style="margin-top:12px">' +
+    '换 https 之后还有两个好处：能发系统通知横幅；数据绑在固定网址上，不会再出现打开后订阅不见了的情况。' +
+    '</div>' +
+    '<button class="btn-primary" style="margin-top:16px" id="ew-export">先导出备份</button>' +
+    '<div class="btn-row"><button class="btn-ghost" id="ew-howto">看怎么换成 https</button></div>' +
+    '<button class="btn-ghost" style="width:100%;margin-top:10px" data-close>先不管，继续用</button>',
+    function (root, close) {
+      root.querySelector('#ew-export').addEventListener('click', function () { close(); actions.export(); });
+      root.querySelector('#ew-howto').addEventListener('click', function () { close(); actions.howto(); });
+    }
+  );
+}
+
+boot();
+
+/* 供自动化测试使用 */
+window.__GRW__ = {
+  db: function () { return DB; },
+  checkSub: checkSub,
+  tick: tick,
+  buildReport: buildReport,
+  parseRepoInput: parseRepoInput,
+  analyzeBody: analyzeBody,
+  compareWithPrev: compareWithPrev,
+  renderMarkdown: renderMarkdown,
+  hash: hash
+};
+})();
+</script>
+</body>
+</html>
